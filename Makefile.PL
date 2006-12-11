@@ -1,0 +1,12 @@
+use inc::Module::Install;
+name 'POE-Component-Proxy-SOCKS';
+author 'Chris Williams <chris@bingosnet.co.uk>';
+version_from 'lib/POE/Component/Proxy/SOCKS.pm';
+license 'perl';
+requires 'Carp' => 0;
+requires 'Socket' => 0;
+requires 'Net::Netmask' => 1.9015;
+requires 'POE' => 0.38;
+requires 'POE::Component::Client::DNS' => 0.99;
+requires 'POE::Component::Client::Ident' => 1.03;
+WriteAll();
