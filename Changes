@@ -1,5 +1,9 @@
 POE::Component::Proxy::SOCKS
 ============================
 
+0.02	Tue Dec 12 10:14:37 GMT 2006
+	- Documentation fixes.
+	- Added time out on BIND sockets.
+
 0.01	Mon Dec 11 14:30:01 GMT 2006
 	- Initial CPAN release.

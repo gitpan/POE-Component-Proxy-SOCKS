@@ -6,7 +6,7 @@ use Socket;
 use Net::Netmask;
 use vars qw($VERSION);
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub spawn {
   my $package = shift;
@@ -41,6 +41,7 @@ sub spawn {
 			_sock_failed
 			_sock_input
 			_sock_down
+			_sock_alarm
 			_bind_request
 		        )
 	   ],
@@ -172,7 +173,7 @@ sub _accept_client {
   };
   $self->_send_event( 'socksd_connection', $id, $peeraddr, $peerport, $sockaddr, $sockport );
 
-  $self->{clients}->{ $id }->{alarm} = $kernel->delay_set( '_conn_alarm', $self->{time_out} || 300, $id );
+  $self->{clients}->{ $id }->{alarm} = $kernel->delay_set( '_conn_alarm', $self->{time_out} || 120, $id );
 
   if ( $self->{ident} ) {
        POE::Component::Client::Ident::Agent->spawn( 
@@ -272,7 +273,7 @@ sub _conn_input {
   my ($kernel,$self,$input,$id) = @_[KERNEL,OBJECT,ARG0,ARG1];
   return unless $self->_conn_exists( $id );
   my $client = $self->{clients}->{ $id };
-  $kernel->delay_adjust( $client->{alarm}, $self->{time_out} || 300 );
+  $kernel->delay_adjust( $client->{alarm}, $self->{time_out} || 120 );
   unless ( $client->{link_id} ) {
      # No uplink the client must be negotiating
      my @args = _parse_input( $input );
@@ -441,6 +442,7 @@ sub _do_bind {
   my $fact_id = $factory->ID();
   $client->{factory} = $fact_id;
   $self->{sockets}->{ $fact_id } = { client => $id, factory => $factory };
+  $self->{sockets}->{ $fact_id }->{alarm} = $kernel->delay_set( '_sock_alarm', $self->{time_out} || 120, $fact_id, $id );
   my $response = pack "CCnN", 0, 90, $port, $myaddr;
   $client->{wheel}->put( $response );
   $self->_send_event( 'socksd_bind_up', $id, $fact_id, inet_ntoa( $myaddr ), $port );
@@ -450,6 +452,7 @@ sub _do_bind {
 sub _sock_failed {
   my ($kernel,$self,$op,$errno,$errstr,$fact_id) = @_[KERNEL,OBJECT,ARG0..ARG3];
   my $factory = delete $self->{sockets}->{ $fact_id };
+  $kernel->alarm_remove( $factory->{alarm} );
   my $client_id = $factory->{client};
   delete $self->{clients}->{ $client_id }->{factory} if $self->_conn_exists( $client_id );
   $kernel->yield( '_reject_client', $client_id, '91', 'Socket failed', $op, $errno, $errstr );
@@ -485,6 +488,7 @@ sub _sock_connection {
   my $sockport = ( unpack_sockaddr_in ( getsockname $socket ) )[0];
   $peeraddr = inet_ntoa( $peeraddr );
   my $factory = delete $self->{sockets}->{ $fact_id };
+  $kernel->alarm_remove( $factory->{alarm} );
   my $client_id = $factory->{client};
   return unless $self->_conn_exists( $client_id );
   my $client = $self->{clients}->{ $client_id };
@@ -504,6 +508,13 @@ sub _sock_connection {
   my $response = pack "CCnN", 0, 90, $sockport, inet_aton( $sockaddr );
   $client->{wheel}->put( $response );
   $self->_send_event( 'socksd_sock_up', $client_id, $link_id, $sockaddr, $sockport );
+  return;
+}
+
+sub _sock_alarm {
+  my ($kernel,$self,$fact_id,$client_id) = @_[KERNEL,OBJECT,ARG0..ARG1];
+  delete $self->{sockets}->{ $fact_id };
+  delete $self->{clients}->{ $client_id };
   return;
 }
 
@@ -754,7 +765,7 @@ The poco supports both SOCKS CONNECT and SOCKS BIND commands.
 
 Starts a new SOCKS proxy session and returns an object. If spawned from within another
 POE session, the parent session will be automagically registered and receive a 
-'socksd_registered' event. See above for details.
+'socksd_registered' event. See below for details.
 
 Takes several optional parameters:
 
@@ -763,6 +774,7 @@ Takes several optional parameters:
   'port', set a particular TCP port to listen on, default 1080;
   'ident', indicate whether ident lookups should be performed, default 0;
   'options', pass a hashref of POE session options;
+  'time_out', adjust the time out period in seconds, default is 120 seconds;
 
 =back
 

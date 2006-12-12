@@ -65,7 +65,7 @@ CONSTRUCTOR
         Starts a new SOCKS proxy session and returns an object. If spawned
         from within another POE session, the parent session will be
         automagically registered and receive a 'socksd_registered' event.
-        See above for details.
+        See below for details.
 
         Takes several optional parameters:
 
@@ -74,6 +74,7 @@ CONSTRUCTOR
           'port', set a particular TCP port to listen on, default 1080;
           'ident', indicate whether ident lookups should be performed, default 0;
           'options', pass a hashref of POE session options;
+          'time_out', adjust the time out period in seconds, default is 120 seconds;
 
 METHODS
     These methods are available on the returned POE::Component::Proxy::SOCKS
