@@ -14,4 +14,4 @@ requires:
   POE::Component::Client::DNS: 0.99
   POE::Component::Client::Ident: 1.03
   Socket: 0
-version: 0.02
+version: 0.03

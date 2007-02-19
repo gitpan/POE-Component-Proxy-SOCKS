@@ -17,3 +17,4 @@ t/00_compile.t
 t/01_spawn.t
 t/99_pod.t
 t/99_pod_coverage.t
+t/99_test_kwalitee.t
