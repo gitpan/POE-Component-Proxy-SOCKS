@@ -6,7 +6,7 @@ use Socket;
 use Net::Netmask;
 use vars qw($VERSION);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 sub spawn {
   my $package = shift;
