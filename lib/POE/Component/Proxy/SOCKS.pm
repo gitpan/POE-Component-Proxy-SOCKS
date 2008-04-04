@@ -1,12 +1,13 @@
 package POE::Component::Proxy::SOCKS;
 
 use strict;
+use warnings;
 use POE qw(Component::Client::Ident Component::Client::DNS Wheel::SocketFactory Wheel::ReadWrite Filter::Stream);
 use Socket;
 use Net::Netmask;
 use vars qw($VERSION);
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 sub spawn {
   my $package = shift;

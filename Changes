@@ -1,6 +1,9 @@
 POE::Component::Proxy::SOCKS
 ============================
 
+0.06	Fri Apr  4 14:39:10 BST 2008
+	- Kwalitee fixes.
+
 0.05	Thu Nov  1 09:28:53 GMT 2007
 	- Updated Module::Install to 0.68
 
