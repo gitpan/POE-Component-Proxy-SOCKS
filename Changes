@@ -1,6 +1,10 @@
 POE::Component::Proxy::SOCKS
 ============================
 
+0.08	Mon May 19 17:35:18 BST 2008
+	- removed kwalitee test
+	- added license information
+
 0.06	Fri Apr  4 14:39:10 BST 2008
 	- Kwalitee fixes.
 
